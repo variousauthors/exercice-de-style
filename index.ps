@@ -16,10 +16,16 @@ Grass
 LIGHTGREEN
 
 HighGrass
-LIGHTGREEN
+green
+
+FutureGrass
+TRANSPARENT
 
 FutureCliff
 TRANSPARENT
+
+CliffBase
+grey
 
 Cliff
 grey
@@ -31,13 +37,16 @@ Sand
 yellow
 
 sink
-TRANSPARENT
+red
 
 sinking
 TRANSPARENT
 
 done
 TRANSPARENT
+
+edge
+BLACK
 
 FutureShallows
 TRANSPARENT
@@ -279,6 +288,8 @@ BirchBridgeV = BirchBridgeVTop or BirchBridgeVBottom
 Bridge = BridgeV or BridgeH or BirchBridgeVTop or BirchBridgeVBottom or BirchBridgeHLeft or BirchBridgeHRight
 Obstacle = Log or Tree or Stone or SunkenStone
 
+? = edge
+
 =======
 SOUNDS
 =======
@@ -290,14 +301,15 @@ COLLISIONLAYERS
 Background
 Shallows
 DeepWater
-Grass, Sand
+Sand
+Grass
 Beach
 SunkenStone
 Stump, Bridge, BirchStump
-Player, Tree, Log, Stone, BirchTrunkBottom, BirchLog, Cliff
-Momentum, TreeTip, BirchTrunkTop, BirchTop, BirchTopRight, BirchTopLeft, HighGrass
-sink, sinking, done
-FutureCliff, FutureSand, FutureShallows
+Player, Tree, Log, Stone, BirchTrunkBottom, BirchLog, CliffBase
+Momentum, TreeTip, BirchTrunkTop, BirchTop, BirchTopRight, BirchTopLeft, HighGrass, Cliff
+sink, sinking, done, edge
+FutureCliff, FutureSand, FutureShallows, FutureGrass
 
 ======
 RULES
@@ -350,34 +362,45 @@ down [ BirchTop | BirchTrunkTop | no BirchTrunkBottom ] -> [ | | ]
 left [ BirchTop | ] -> [ BirchTop | BirchTopLeft ]
 right [ BirchTopLeft | no BirchTop ] -> [ | ]
 
-right [ BirchTop | ] -> [ BirchTop | BirchTopRight ]
+right [ BirchTop | ] -> [ BirchTop | BirchTopRight ] 
 left [ BirchTopRight | no BirchTop ] -> [ | ]
 
 ( sink everything )
-
-[sink][ grass ] -> [sink][ HighGrass ]
+[sink][ Grass no sink ] -> [sink][ sinking Grass ]
 [sink][ shallows ] -> [sink][ sinking shallows ]
 [sink][ DeepWater ] -> [sink][ sinking DeepWater ]
 
-down [sink][ shallows | sinking shallows | | | ] -> [sink][ shallows | done shallows | | | FutureSand ]
-down [sink][ DeepWater | sinking shallows | | | ] -> [sink][ DeepWater | done shallows | | | FutureSand ]
-down [sink][ HighGrass | sinking shallows | | | ] -> [sink][ HighGrass | done shallows FutureCliff | FutureCliff | FutureCliff | FutureSand ]
+( replace the shallows )
+down [sink][ sinking shallows  | | | ]      -> [sink][ done shallows  | | | FutureSand ]
 
-down [sink][ HighGrass | sinking DeepWater | | | ] -> [sink][ HighGrass | done DeepWater FutureCliff | FutureCliff | FutureCliff | FutureShallows ]
+( replace the deep water )
+down [sink][ sinking DeepWater | | | ] -> [sink][ done DeepWater | | | FutureShallows ]
 
-down [sink][ DeepWater | sinking DeepWater | | | ] -> [sink][ DeepWater | done DeepWater | | | FutureShallows ]
-down [sink][ Shallows | sinking DeepWater | | | ] -> [sink][ Shallows | done DeepWater | | | FutureShallows ]
+( deal with the edges )
+down [sink][ sinking DeepWater | | | edge ] -> [sink][ done DeepWater | | | edge ]
+down [sink][ sinking DeepWater | | edge ]   -> [sink][ done DeepWater | | edge ]
+down [sink][ sinking DeepWater | edge ]     -> [sink][ done DeepWater | edge ]
+
+down [sink][edge | | | ] -> [sink][edge | FutureShallows | FutureShallows | FutureShallows ]
+
+( lower the grass )
+down [sink][ sinking Grass | | | ] -> [sink][ done Grass | | | FutureGrass ]
 
 [ sink ] -> []
 
 [ done shallows ] -> []
 [ done DeepWater ] -> []
+[ done HighGrass ] -> []
+[ done Grass ] -> []
 
 [ futureSand ] -> [ Sand ]
 [ FutureCliff ] -> [ Cliff ]
 [ FutureShallows ] -> [ Shallows ]
+[ FutureGrass ] -> [ HighGrass ]
 
-
+( TODO the player will need to be detached: )
+( one body for the highlands and one for the low )
+( this way the low body can pass under the trees and rocks that didn't sink )
 
 ==============
 WINCONDITIONS
@@ -388,6 +411,7 @@ WINCONDITIONS
 LEVELS
 =======
 
+??????????????????????????????????????????????????
 ~~~~~~~~~~~~~~......~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~..o..~~~~~~~~..~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~....-~~~~~~~....~~~~~~~~~~~~~~~~~~~
@@ -412,5 +436,8 @@ LEVELS
 ~~~~~~~~~~~~....o~~~~~~~----~~~~~~--~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~....~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+??????????????????????????????????????????????????
 
