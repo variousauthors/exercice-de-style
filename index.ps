@@ -149,7 +149,7 @@ o = stone and Grass
 Log = LogV or LogH or LogUp
 
 Bridge = BridgeV or BridgeH
-Obstacle = Log or Tree or Stone or SunkenStone
+Obstacle = Log or Tree or Stone or SunkenStone or stump
 
 =======
 SOUNDS
@@ -191,6 +191,10 @@ horizontal [ > player | tree | no Obstacle ] -> [player | stump | LogH ]
 vertical [> player | LogUp | no Obstacle ] -> [ | player | LogV ]
 horizontal [ > player | LogUp | no Obstacle ] -> [ | player | LogH ]
 
+( otherwise the player is blocked by standing logs )
+vertical [> player | LogUp ] -> [ player | LogUp ]
+horizontal [ > player | LogUp ] -> [ player | LogUp ]
+
 ( the player hops onto logs from stumps )
 vertical [> player stump | logV ] -> [ stump | player LogV ]
 horizontal [ > player stump | LogH ] -> [ stump | player LogH ]
@@ -200,24 +204,29 @@ horizontal [ > player stump | LogH ] -> [ stump | player LogH ]
 vertical [ > player | stationary logV | water ] -> [ > player | > LogV | water ]
 horizontal [ > player | stationary logH | water ] -> [ > player | > LogH | water ]
 ( not into the water )
-vertical [ > player | stationary logV ] -> [ > player | > LogUp ]
-horizontal [ > player | stationary logH ] -> [ > player | > LogUp ]
+vertical [ > player | stationary logV | no obstacle ] -> [ > player | > LogUp | ]
+horizontal [ > player | stationary logH | no obstacle ] -> [ > player | > LogUp | ]
 
 ( rolling: this could be cleaned up )
-vertical [ > player | logH ] -> [ player | > logH ]
-horizontal [ > player | logV ] -> [ player | > logV ]
+vertical [ > player | logH | no obstacle ] -> [ player | > logH | ]
+horizontal [ > player | logV | no obstacle ] -> [ player | > logV | ]
 
 ( roll logs horizontally )
 horizontal [ LogV | Momentum ] -> [ > LogV | ]
-horizontal [ > LogV | no Obstacle | ] -> [ > LogV | | Momentum ] again
+horizontal [ > LogV | no Obstacle no water | ] -> [ > LogV | | Momentum ] again
 
 ( roll logs vertically )
 vertical [ LogH | Momentum ] -> [ > LogH | ]
-vertical [ > LogH | no Obstacle | ] -> [ > LogH | | Momentum ] again
+vertical [ > LogH | no Obstacle no water | ] -> [ > LogH | | Momentum ] again
 
 ( remove the momentum marker )
 [ Momentum Obstacle ] -> [ Obstacle ]
 [ Momentum Obstacle | Momentum ] -> [ Obstacle | ]
+
+( generally though, a player can't walk into a log )
+( they are on a lower collision layer though )
+( so if no other rules has said yes, then no )
+[ > player | stationary log ] -> [ player | log ]
 
 ( logs in water become bridges )
 late [ water logV ] -> [ bridgeV ]
