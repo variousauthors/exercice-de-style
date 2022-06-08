@@ -180,6 +180,10 @@ RULES
 vertical [ > player | bridgeH ] -> [ player | bridgeH ]
 horizontal [ > player | bridgeV ] -> [ player | bridgeV ]
 
+( they can't step the wrong way off a log )
+vertical [ > player bridgeH ] -> [ player bridgeH ]
+horizontal [ > player bridgeV ] -> [ player bridgeV ]
+
 ( bridges are checkpoints )
 late [ player bridge ] -> checkpoint
 
