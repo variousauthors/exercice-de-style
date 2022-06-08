@@ -93,19 +93,19 @@ brown LIGHTBROWN
 
 BridgeH
 brown #ADD8E6
-11111
+.....
 00000
 00000
 00000
-11111
+.....
 
 BridgeV
 brown #ADD8E6 yellow #BDE8F6
-10001
-10001
-10001
-10001
-10001
+.000.
+.000.
+.000.
+.000.
+.000.
 
 Stone
 lightgrey grey
@@ -174,9 +174,9 @@ RULES
 ======
 
 ( the player can't cross water like, at all )
-[ > player | water ] -> [ player | water ]
+[ > player | water no bridge ] -> [ player | water ]
 
-( they can cross bridges in the direction of the log )
+( they can't cross against the grain of the log )
 vertical [ > player | bridgeH ] -> [ player | bridgeH ]
 horizontal [ > player | bridgeV ] -> [ player | bridgeV ]
 
@@ -242,6 +242,9 @@ late up [ LogUp | no LogUpTip ] -> [ LogUp | LogUpTip ]
 
 late down [ PlayerTip | no Player ] -> [ | ]
 late up [ Player | no PlayerTip ] -> [ Player | PlayerTip ]
+
+( water gets eliminated at some point so put it back lol )
+late [ bridge no water ] -> [ bridge water ]
 
 down [ Grass | water no beach ] -> [ Grass | water beach ]
 
