@@ -176,6 +176,7 @@ RULES
 ( push a log over onto a stump, it lays across the stump )
 ( two logs make a raft )
 ( push off and the raft goes )
+( logs roll across bridges )
 
 ( the player can't cross water like, at all )
 [ > player | water no bridge ] -> [ player | water ]
@@ -228,14 +229,14 @@ vertical [ > player log | logH ] -> [ player log | > LogHRolling ]
 horizontal [ > player log | logV ] -> [ player log  | > LogVRolling ]
 
 ( roll logs horizontally )
-late horizontal [ LogVRolling water ] -> [ logV water ]
+late horizontal [ Momentum | LogVRolling water no bridgeH ] -> [ | logV water ]
 horizontal [ Momentum | LogVRolling ] -> [ | > LogVRolling ]
 horizontal [ > LogVRolling | LogV ] -> [ LogV | > LogVRolling ]
 horizontal [ > LogVRolling | obstacle ] -> [ logV | obstacle ]
-horizontal [ > LogVRolling | no Obstacle no water ] -> [ > LogVRolling Momentum | ] again
+horizontal [ > LogVRolling | no Obstacle ] -> [ > LogVRolling Momentum | ] again
 
 ( roll logs vertically )
-late vertical [ LogHRolling water ] -> [ logH water ]
+late vertical [ Momentum | LogHRolling water no BridgeV ] -> [ | logH water ]
 vertical [ Momentum | LogHRolling ] -> [ | > LogHRolling ]
 vertical [ > LogHRolling | LogH ] -> [ LogH | > LogHRolling ]
 vertical [ > LogHRolling | obstacle ] -> [ logH | obstacle ]
