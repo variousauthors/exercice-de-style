@@ -205,15 +205,17 @@ horizontal [ > player stump | LogH ] -> [ stump | player LogH ]
 
 ( the player can kind of lift/push logs )
 ( into the water )
-vertical [ > player | stationary logV | water ] -> [ > player | > LogV | water ]
-horizontal [ > player | stationary logH | water ] -> [ > player | > LogH | water ]
+vertical [ > player no log | stationary logV | water ] -> [ > player | > LogV | water ]
+horizontal [ > player no log | stationary logH | water ] -> [ > player | > LogH | water ]
 ( not into the water )
-vertical [ > player | stationary logV | no obstacle ] -> [ > player | > LogUp | ]
-horizontal [ > player | stationary logH | no obstacle ] -> [ > player | > LogUp | ]
+vertical [ > player no log | stationary logV | no logupblocker ] -> [ > player | > LogUp | ]
+horizontal [ > player no log | stationary logH | no logupblocker ] -> [ > player | > LogUp | ]
 
 ( rolling: this could be cleaned up )
 vertical [ > player | logH | no obstacle ] -> [ player | > logH | ]
 horizontal [ > player | logV | no obstacle ] -> [ player | > logV | ]
+vertical [ > player | logV | logH | no obstacle ] -> [ player | logV | > logH | ]
+horizontal [ > player | logH | logV | no obstacle ] -> [ player | logH | > logV | ]
 
 ( roll logs horizontally )
 horizontal [ LogV | Momentum ] -> [ > LogV | ]
