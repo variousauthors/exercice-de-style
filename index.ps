@@ -241,8 +241,6 @@ RULES
 
 ( need to remove orphaned momentum when log goes into water )
 
-( push a log over onto a stump, it lays across the stump )
-
 ( raft can push off a rock )
 ( this rule has to be early and not remove the < impulse )
 ( this is so a player can push off a tree, and still knock over the tree, etc... )
@@ -311,6 +309,7 @@ vertical [ > player log | logH ] -> [ player log | > LogHRolling ]
 horizontal [ > player log | logV ] -> [ player log  | > LogVRolling ]
 
 ( roll logs horizontally )
+late horizontal [ Momentum | LogVRolling water no bridgeH ] -> [ | logV water ]
 late horizontal [ LogVRolling water no bridgeH ] -> [ logV water ]
 horizontal [ Momentum | LogVRolling ] -> [ | > LogVRolling ]
 horizontal [ > LogVRolling | LogV ] -> [ LogV | > LogVRolling ]
@@ -318,6 +317,7 @@ horizontal [ > LogVRolling | obstacle ] -> [ logV | obstacle ]
 horizontal [ > LogVRolling | no Obstacle ] -> [ > LogVRolling Momentum | ] again
 
 ( roll logs vertically )
+late vertical [ Momentum | LogHRolling water no BridgeV ] -> [ | logH water ]
 late vertical [ LogHRolling water no BridgeV ] -> [ logH water ]
 vertical [ Momentum | LogHRolling ] -> [ | > LogHRolling ]
 vertical [ > LogHRolling | LogH ] -> [ LogH | > LogHRolling ]
