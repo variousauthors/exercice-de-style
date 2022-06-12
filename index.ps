@@ -139,6 +139,30 @@ brown darkbrown #ADD8E6 yellow #BDE8F6
 00100
 00100
 
+LogOnStumpV
+brown LIGHTBROWN
+.000.
+.000.
+.000.
+.111.
+.....
+
+LogOnStumpVTip
+brown LIGHTBROWN
+.....
+.....
+.....
+.....
+.000.
+
+LogOnStumpH
+brown LIGHTBROWN
+00000
+00000
+00000
+.000.
+.....
+
 Stone
 lightgrey grey
 ..000
@@ -183,7 +207,7 @@ P = Player and Grass
 T = tree and Grass
 o = stone and Grass
 
-Log = LogV or LogH or LogUp or LogHRolling or LogVRolling
+Log = LogV or LogH or LogUp or LogHRolling or LogVRolling or LogOnStumpV or LogOnStumpH
 
 Raft = RaftH or RaftV
 Bridge = BridgeV or BridgeH or Raft
@@ -208,12 +232,14 @@ Stump
 Bridge
 Log
 Player, Tree, Stone
-TreeTip, LogUpTip, PlayerTip
+TreeTip, LogUpTip, PlayerTip, LogOnStumpVTip
 Momentum
 
 ======
 RULES
 ======
+
+( need to remove orphaned momentum when log goes into water )
 
 ( push a log over onto a stump, it lays across the stump )
 
@@ -234,15 +260,21 @@ vertical [ > player bridgeH ] -> [ player bridgeH ]
 horizontal [ > player bridgeV ] -> [ player bridgeV ]
 
 ( bridges are checkpoints )
-( late [ player bridge ] -> checkpoint )
+late [ player bridge ] -> checkpoint
 
 ( the player can knock over trees )
 vertical [ > player | tree | no Obstacle ] -> [ player | stump | LogV ]
 horizontal [ > player | tree | no Obstacle ] -> [ player | stump | LogH ]
+( onto a stump )
+vertical [ > player | tree | stump ] -> [ player | stump | stump LogOnStumpV ]
+horizontal [ > player | tree | stump ] -> [ player | stump | stump LogOnStumpH ]
 
 ( the player can knock over standing logs )
 vertical [> player | LogUp | no Obstacle ] -> [ | player | LogV ]
 horizontal [ > player | LogUp | no Obstacle ] -> [ | player | LogH ]
+( onto stumps )
+vertical [> player | LogUp | stump no Log ] -> [ | player | stump LogOnStumpV ]
+horizontal [ > player | LogUp | stump no Log ] -> [ | player | stump LogOnStumpH ]
 
 ( otherwise the player is blocked by standing logs )
 vertical [> player | LogUp ] -> [ player | LogUp ]
@@ -259,10 +291,16 @@ horizontal [ > player no log | stationary logH | water ] -> [ > player | > LogH 
 ( not into the water )
 vertical [ > player no log | stationary logV | no logupblocker ] -> [ > player | > LogUp | ]
 horizontal [ > player no log | stationary logH | no logupblocker ] -> [ > player | > LogUp | ]
+( and log on stump )
+vertical [ > player no log | stationary LogOnStumpV | no logupblocker ] -> [ > player | > LogUp | ]
+horizontal [ > player no log | stationary LogOnStumpH | no logupblocker ] -> [ > player | > LogUp | ]
 
 ( rolling: this could be cleaned up )
 vertical [ > player no log | logH ] -> [ > player | > LogHRolling ]
 horizontal [ > player no log | logV ] -> [ > player | > LogVRolling ]
+( and log on stump )
+vertical [ > player no log | LogOnStumpH | no obstacle ] -> [ > player | > LogHRolling | no obstacle ]
+horizontal [ > player no log | LogOnStumpV | no obstacle ] -> [ > player | > LogVRolling | no obstacle ]
 
 ( standing a log up into a perpendicular log, rolls it)
 vertical [ > player no log | logV | logH ] -> [ > player | > logUp | > LogHRolling ]
@@ -303,10 +341,15 @@ vertical [ > LogHRolling | no Obstacle no water ] -> [ > LogHRolling Momentum | 
 ( logs in water become bridges )
 late [ BridgeV logV ] -> [ RaftV ]
 late [ BridgeH logH ] -> [ RaftH ]
+late [ BridgeV logH ] -> [ RaftH ]
+late [ BridgeH logV ] -> [ RaftV ]
 late [ water logV ] -> [ bridgeV ]
 late [ water logH ] -> [ bridgeH ]
 
 ( render pretty things )
+
+late down [ LogOnStumpVTip | no LogOnStumpV ] -> [ | ]
+late up [ LogOnStumpV | no LogOnStumpVTip ] -> [ LogOnStumpV | LogOnStumpVTip ]
 
 late down [ TreeTip | no tree ] -> [ | ]
 late up [ tree | no TreeTip ] -> [ tree | TreeTip ]
