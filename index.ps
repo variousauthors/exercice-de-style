@@ -76,16 +76,32 @@ brown lightbrown
 .....
 
 LogH
-brown
-.....
+brown blue
+....1
 00000
 00000
 00000
 .....
 
 LogV
-brown LIGHTBROWN
+brown LIGHTBROWN blue
+.0002
 .000.
+.000.
+.000.
+.111.
+
+LogHRolling
+brown pink
+....1
+00000
+00000
+00000
+.....
+
+LogVRolling
+brown LIGHTBROWN
+.0001
 .000.
 .000.
 .000.
@@ -107,6 +123,22 @@ brown #ADD8E6 yellow #BDE8F6
 .000.
 .000.
 
+RaftH
+brown darkbrown #ADD8E6 yellow #BDE8F6
+00000
+00000
+11111
+00000
+00000
+
+RaftV
+brown darkbrown #ADD8E6 yellow #BDE8F6
+00100
+00100
+00100
+00100
+00100
+
 Stone
 lightgrey grey
 ..000
@@ -124,7 +156,12 @@ LIGHTGRAY grey #ADD8E6 #9DC8E6
 33333
 
 Momentum
-TRANSPARENT
+yellow #BDE8F6
+.....
+.....
+..1..
+.....
+.....
 
 Beach
 yellow #BDE8F6
@@ -146,10 +183,13 @@ P = Player and Grass
 T = tree and Grass
 o = stone and Grass
 
-Log = LogV or LogH or LogUp
+Log = LogV or LogH or LogUp or LogHRolling or LogVRolling
 
-Bridge = BridgeV or BridgeH
+Raft = RaftH or RaftV
+Bridge = BridgeV or BridgeH or Raft
 Obstacle = Log or Tree or Stone or SunkenStone or stump
+LogUpBlocker = Log or Tree or Stone
+RaftObstacle = Log or Tree or Stone
 
 =======
 SOUNDS
@@ -165,18 +205,22 @@ Water
 Beach
 SunkenStone
 Stump
-Bridge, Log
+Bridge
+Log
 Player, Tree, Stone
-Momentum, TreeTip, LogUpTip, PlayerTip
+TreeTip, LogUpTip, PlayerTip
+Momentum
 
 ======
 RULES
 ======
 
 ( push a log over onto a stump, it lays across the stump )
-( two logs make a raft )
-( push off and the raft goes )
-( logs roll across bridges )
+
+( raft can push off a rock )
+( this rule has to be early and not remove the < impulse )
+( this is so a player can push off a tree, and still knock over the tree, etc... )
+[ raftobstacle | < player raft | water ] -> [ raftobstacle | < player > raft | water ]
 
 ( the player can't cross water like, at all )
 [ > player | water no bridge ] -> [ player | water ]
@@ -190,11 +234,11 @@ vertical [ > player bridgeH ] -> [ player bridgeH ]
 horizontal [ > player bridgeV ] -> [ player bridgeV ]
 
 ( bridges are checkpoints )
-late [ player bridge ] -> checkpoint
+( late [ player bridge ] -> checkpoint )
 
 ( the player can knock over trees )
-vertical [> player | tree | no Obstacle ] -> [player | stump | LogV ]
-horizontal [ > player | tree | no Obstacle ] -> [player | stump | LogH ]
+vertical [ > player | tree | no Obstacle ] -> [ player | stump | LogV ]
+horizontal [ > player | tree | no Obstacle ] -> [ player | stump | LogH ]
 
 ( the player can knock over standing logs )
 vertical [> player | LogUp | no Obstacle ] -> [ | player | LogV ]
@@ -229,20 +273,27 @@ vertical [ > player log | logH ] -> [ player log | > LogHRolling ]
 horizontal [ > player log | logV ] -> [ player log  | > LogVRolling ]
 
 ( roll logs horizontally )
-late horizontal [ Momentum | LogVRolling water no bridgeH ] -> [ | logV water ]
+late horizontal [ LogVRolling water no bridgeH ] -> [ logV water ]
 horizontal [ Momentum | LogVRolling ] -> [ | > LogVRolling ]
 horizontal [ > LogVRolling | LogV ] -> [ LogV | > LogVRolling ]
 horizontal [ > LogVRolling | obstacle ] -> [ logV | obstacle ]
 horizontal [ > LogVRolling | no Obstacle ] -> [ > LogVRolling Momentum | ] again
 
 ( roll logs vertically )
-late vertical [ Momentum | LogHRolling water no BridgeV ] -> [ | logH water ]
+late vertical [ LogHRolling water no BridgeV ] -> [ logH water ]
 vertical [ Momentum | LogHRolling ] -> [ | > LogHRolling ]
 vertical [ > LogHRolling | LogH ] -> [ LogH | > LogHRolling ]
 vertical [ > LogHRolling | obstacle ] -> [ logH | obstacle ]
 vertical [ > LogHRolling | no Obstacle no water ] -> [ > LogHRolling Momentum | ] again
 
-( remove the momentum marker )
+( raft go )
+[ Momentum | raft ] -> [ | > raft ]
+[ > raft | obstacle ] -> [ raft | obstacle ]
+[ > raft | bridge ] -> [ raft | bridge ]
+[ > raft | no water ] -> [ raft | no water ]
+[ > raft | water ] -> [ > raft Momentum | ] again
+
+[ player > raft ] -> [ > player > raft ]
 
 ( generally though, a player can't walk into a log )
 ( they are on a lower collision layer though )
@@ -250,6 +301,8 @@ vertical [ > LogHRolling | no Obstacle no water ] -> [ > LogHRolling Momentum | 
 [ > player | stationary log ] -> [ player | log ]
 
 ( logs in water become bridges )
+late [ BridgeV logV ] -> [ RaftV ]
+late [ BridgeH logH ] -> [ RaftH ]
 late [ water logV ] -> [ bridgeV ]
 late [ water logH ] -> [ bridgeH ]
 
